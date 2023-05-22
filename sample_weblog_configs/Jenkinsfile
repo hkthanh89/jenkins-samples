@@ -1,0 +1,23 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                git url: 'https://github.com/hkthanh89/sample_weblog.git', branch: 'main'
+                
+                sh 'docker build -t sample_weblog .'
+                sh 'docker tag sample_weblog:latest hkthanh89/sample_weblog:latest'
+                withDockerRegistry([ credentialsId: "dockerhub", url: "" ]) {
+                  sh  'docker push hkthanh89/sample_weblog:latest'
+                }
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                sh 'docker run --rm hkthanh89/sample_weblog:latest rails test'
+            }
+        }
+    }
+}
+
